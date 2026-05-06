@@ -1,0 +1,32 @@
+---
+- name: Create sales users and deploy devops key
+  hosts: saleshost
+  become: true
+
+  vars_files:
+    - host_vars/srv2.example.com/vault
+
+  tasks:
+
+    - name: Ensure sales group exists
+      ansible.builtin.group:
+        name: sales
+        state: present
+
+    - name: Create user accounts
+      ansible.builtin.user:
+        name: "{{ item.accountname }}"
+        comment: "{{ item.fullname }}"
+        password: "{{ item.password | password_hash('sha512') }}"
+        groups: "{{ item.groups }}"
+        append: true
+        create_home: true
+        state: present
+      loop: "{{ useraccounts }}"
+
+    - name: Deploy devops public key to each user
+      ansible.posix.authorized_key:
+        user: "{{ item.accountname }}"
+        state: present
+        key: "{{ lookup('file', 'public_keys/id_rsa.pub') }}"
+      loop: "{{ useraccounts }}"
