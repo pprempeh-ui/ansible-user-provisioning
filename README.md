@@ -31,3 +31,14 @@ This project automates Linux user account provisioning using Ansible. It securel
 ```bash
 ansible-playbook -i inventory create_users.yml --ask-vault-pass
 ```
+
+## Architecture
+
+```text
+Control Node (Ansible)
+        |
+        v
+Managed Linux Hosts
+        |
+        v
+User Accounts + SSH Key Deployment
